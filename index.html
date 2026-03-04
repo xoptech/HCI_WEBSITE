@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Account Settings</title>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<style>
+		*, *::before, *::after {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		:root {
+			--bg: #0c0f14;
+			--surface: #13171f;
+			--surface-2: #1a2030;
+			--border: #252d3d;
+			--text: #e8eef6;
+			--text-muted: #68748a;
+			--red: #e05252;
+			--red-dim: #2e1515;
+			--green: #34c9a0;
+			--green-dim: #0c2820;
+			--yellow: #e8a830;
+			--yellow-dim: #261e0a;
+			--disabled: #2a3040;
+			--accent: #5b7fff;
+		}
+
+		body {
+			font-family: 'Plus Jakarta Sans', sans-serif;
+			background: var(--bg);
+			color: var(--text);
+			min-height: 100vh;
+		}
+
+		.layout {
+			display: flex;
+			min-height: 100vh;
+		}
+
+		.sidebar {
+			width: 220px;
+			flex-shrink: 0;
+			background: var(--surface);
+			border-right: 1px solid var(--border);
+			padding: 28px 14px;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			position: sticky;
+			top: 0;
+			height: 100vh;
+			overflow-y: auto;
+		}
+
+		.sidebar-logo {
+			font-size: 17px;
+			font-weight: 700;
+			color: var(--text);
+			padding: 0 10px;
+			margin-bottom: 24px;
+			letter-spacing: -0.3px;
+		}
+
+		.sidebar-logo span {
+			color: var(--accent);
+		}
+
+		.sidebar-label {
+			font-size: 10px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.12em;
+			color: var(--text-muted);
+			padding: 0 10px;
+			margin: 12px 0 6px;
+		}
+
+		.sidebar-item {
+			display: flex;
+			align-items: center;
+			gap: 9px;
+			padding: 9px 10px;
+			border-radius: 8px;
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 400;
+			color: var(--text-muted);
+			transition: background 0.15s, color 0.15s;
+			border: none;
+			background: none;
+			width: 100%;
+			text-align: left;
+			font-family: 'Plus Jakarta Sans', sans-serif;
+		}
+
+		.sidebar-item:hover {
+			background: var(--surface-2);
+			color: var(--text);
+		}
+
+		.sidebar-item.active {
+			background: var(--surface-2);
+			color: var(--text);
+		}
+
+		.sidebar-item .material-icons {
+			font-size: 17px;
+		}
+
+		.sidebar-badge {
+			margin-left: auto;
+			background: var(--red);
+			color: #fff;
+			font-size: 10px;
+			font-weight: 600;
+			border-radius: 20px;
+			padding: 1px 7px;
+			min-width: 18px;
+			text-align: center;
+		}
+
+		.main {
+			flex: 1;
+			padding: 32px 28px;
+			min-width: 0;
+		}
+
+		.main-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 24px;
+			flex-wrap: wrap;
+			gap: 12px;
+		}
+
+		.main-header-left {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.main-title {
+			font-size: 22px;
+			font-weight: 700;
+			letter-spacing: -0.4px;
+		}
+
+		.header-right {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.search-box {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			padding: 8px 12px;
+		}
+
+		.search-box .material-icons {
+			font-size: 15px;
+			color: var(--text-muted);
+		}
+
+		.search-box input {
+			background: none;
+			border: none;
+			outline: none;
+			font-family: 'Plus Jakarta Sans', sans-serif;
+			font-size: 13px;
+			color: var(--text);
+			width: 150px;
+		}
+
+		.search-box input::placeholder {
+			color: var(--text-muted);
+		}
+
+		.account-list {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.account-card {
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 16px 20px;
+			transition: opacity 0.4s, filter 0.4s;
+		}
+
+		.account-card.deactivated {
+			opacity: 0.38;
+			filter: grayscale(0.8);
+		}
+
+		.account-card.fade-out {
+			animation: fadeOut 0.35s ease forwards;
+		}
+
+		.account-row {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			flex-wrap: wrap;
+		}
+
+		.avatar {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+			font-weight: 600;
+			flex-shrink: 0;
+			color: #fff;
+			font-family: 'Plus Jakarta Sans', sans-serif;
+		}
+
+		.account-info {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.account-name {
+			
+			font-size: 16px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.account-meta {
+			font-size: 12px;
+			color: var(--text-muted);
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			margin-top: 1px;
+		}
+
+		.account-actions {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			flex-shrink: 0;
+		}
+
+		.btn {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			padding: 7px 13px;
+			border-radius: 8px;
+			font-family: 'Plus Jakarta Sans', sans-serif;
+			font-size: 13px;
+			font-weight: 500;
+			cursor: pointer;
+			border: none;
+			transition: background 0.2s, transform 0.1s;
+		}
+
+		.btn:active {
+			transform: scale(0.97);
+		}
+
+		.btn .material-icons {
+			font-size: 15px;
+		}
+
+		.btn-ghost {
+			background: var(--surface-2);
+			color: var(--text-muted);
+			border: 1px solid var(--border);
+		}
+
+		.btn-ghost:hover {
+			color: var(--text);
+		}
+
+		.btn-primary {
+			background: var(--accent);
+			color: #fff;
+		}
+
+		.btn-primary:hover {
+			background: #4a6eee;
+		}
+
+		.btn-save {
+			background: var(--green-dim);
+			color: var(--green);
+			border: 1px solid var(--green);
+		}
+
+		.btn-save:hover {
+			background: #123328;
+		}
+
+		.btn-danger {
+			background: var(--red-dim);
+			color: var(--red);
+			border: 1px solid var(--red);
+			margin-left: 14px;
+		}
+
+		.btn-danger:hover {
+			background: #3d1a1a;
+		}
+
+		.btn-restore {
+			background: var(--green-dim);
+			color: var(--green);
+			border: 1px solid var(--green);
+		}
+
+		.btn-restore:hover {
+			background: #123328;
+		}
+
+		.btn-confirm {
+			background: var(--red);
+			color: #fff;
+		}
+
+		.btn-confirm:hover:not(:disabled) {
+			background: #c44040;
+		}
+
+		.btn-confirm:disabled {
+			background: var(--disabled);
+			color: var(--text-muted);
+			cursor: not-allowed;
+		}
+
+		.expand-area {
+			overflow: hidden;
+			max-height: 0;
+			transition: max-height 0.35s ease;
+		}
+
+		.expand-area.open {
+			max-height: 500px;
+		}
+
+		.expand-inner {
+			padding-top: 16px;
+			border-top: 1px solid var(--border);
+			margin-top: 16px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+		}
+
+		.expand-inner .edit-actions {
+			grid-column: 1 / -1;
+			display: flex;
+			gap: 8px;
+		}
+
+		.field {
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+		}
+
+		.field.full {
+			grid-column: 1 / -1;
+		}
+
+		.field label {
+			font-size: 10px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+			color: var(--text-muted);
+		}
+
+		.field-input {
+			background: var(--surface-2);
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			padding: 8px 11px;
+			font-family: 'Plus Jakarta Sans', sans-serif;
+			font-size: 13px;
+			color: var(--text);
+			outline: none;
+			width: 100%;
+			transition: border-color 0.2s;
+		}
+
+		.field-input:focus {
+			border-color: var(--accent);
+		}
+
+		.deactivation-banner {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			background: var(--yellow-dim);
+			border: 1px solid var(--yellow);
+			border-radius: 8px;
+			padding: 9px 13px;
+			font-size: 12px;
+			color: var(--yellow);
+			margin-top: 12px;
+		}
+
+		.deactivation-banner .material-icons {
+			font-size: 15px;
+			flex-shrink: 0;
+		}
+
+		.trash-actions {
+			display: flex;
+			gap: 8px;
+			margin-top: 12px;
+			flex-wrap: wrap;
+		}
+
+		.add-form-card {
+			background: var(--surface);
+			border: 1px dashed var(--border);
+			border-radius: 12px;
+			padding: 20px;
+			display: none;
+			animation: slideIn 0.25s ease;
+		}
+
+		.add-form-card.visible {
+			display: block;
+		}
+
+		.add-form-title {
+			
+			font-size: 17px;
+			margin-bottom: 16px;
+			color: var(--text-muted);
+		}
+
+		.add-form-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+			margin-bottom: 16px;
+		}
+
+		.add-form-actions {
+			display: flex;
+			gap: 8px;
+		}
+
+		.toast {
+			position: fixed;
+			bottom: 24px;
+			left: 50%;
+			transform: translateX(-50%) translateY(80px);
+			background: var(--surface-2);
+			border: 1px solid var(--border);
+			border-radius: 10px;
+			padding: 12px 18px;
+			font-size: 13px;
+			color: var(--text);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			min-width: 260px;
+			max-width: 90vw;
+			box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+			transition: transform 0.3s ease;
+			z-index: 100;
+		}
+
+		.toast.visible {
+			transform: translateX(-50%) translateY(0);
+		}
+
+		.toast-undo {
+			background: none;
+			border: none;
+			color: var(--green);
+			font-family: 'Plus Jakarta Sans', sans-serif;
+			font-size: 13px;
+			font-weight: 600;
+			cursor: pointer;
+			padding: 0;
+			white-space: nowrap;
+		}
+
+		.toast-undo:hover {
+			text-decoration: underline;
+		}
+
+		.overlay {
+			position: fixed;
+			inset: 0;
+			background: rgba(0,0,0,0.75);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 200;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.2s;
+			padding: 16px;
+		}
+
+		.overlay.visible {
+			opacity: 1;
+			pointer-events: all;
+		}
+
+		.modal {
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			padding: 28px;
+			width: 100%;
+			max-width: 400px;
+			transform: scale(0.95);
+			transition: transform 0.2s;
+		}
+
+		.overlay.visible .modal {
+			transform: scale(1);
+		}
+
+		.modal.shake {
+			animation: shake 0.4s ease;
+		}
+
+		.modal-icon {
+			font-size: 28px;
+			color: var(--red);
+			margin-bottom: 10px;
+		}
+
+		.modal-title {
+			
+			font-size: 20px;
+			font-weight: 400;
+			margin-bottom: 8px;
+		}
+
+		.modal-desc {
+			font-size: 13px;
+			color: var(--text-muted);
+			margin-bottom: 18px;
+			line-height: 1.65;
+		}
+
+		.modal-desc strong {
+			color: var(--text);
+		}
+
+		.modal-input {
+			width: 100%;
+			padding: 9px 13px;
+			background: var(--surface-2);
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			font-family: 'Plus Jakarta Sans', sans-serif;
+			font-size: 13px;
+			color: var(--text);
+			outline: none;
+			margin-bottom: 16px;
+			transition: border-color 0.2s, background 0.2s;
+		}
+
+		.modal-input:focus {
+			border-color: var(--red);
+		}
+
+		.modal-input.matched {
+			border-color: var(--red);
+			background: var(--red-dim);
+		}
+
+		.modal-actions {
+			display: flex;
+			gap: 10px;
+			justify-content: flex-end;
+		}
+
+		.mobile-menu-btn {
+			display: none;
+			background: none;
+			border: none;
+			color: var(--text);
+			cursor: pointer;
+			padding: 4px;
+		}
+
+		.mobile-menu-btn .material-icons {
+			font-size: 22px;
+		}
+
+		.sidebar-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0,0,0,0.6);
+			z-index: 50;
+		}
+
+		.empty-state {
+			text-align: center;
+			padding: 52px 24px;
+			color: var(--text-muted);
+			font-size: 14px;
+		}
+
+		.empty-state .material-icons {
+			font-size: 36px;
+			margin-bottom: 10px;
+			display: block;
+		}
+
+		.empty-state p {
+			
+			font-size: 16px;
+		}
+
+		@media (max-width: 700px) {
+			.sidebar {
+				position: fixed;
+				left: -240px;
+				top: 0;
+				z-index: 60;
+				transition: left 0.3s ease;
+				height: 100vh;
+			}
+
+			.sidebar.open {
+				left: 0;
+			}
+
+			.sidebar-overlay.visible {
+				display: block;
+			}
+
+			.mobile-menu-btn {
+				display: flex;
+			}
+
+			.main {
+				padding: 18px 14px;
+			}
+
+			.expand-inner,
+			.add-form-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.expand-inner .edit-actions {
+				grid-column: 1;
+			}
+
+			.account-actions {
+				width: 100%;
+				justify-content: flex-end;
+			}
+
+			.btn-danger {
+				margin-left: auto;
+			}
+
+			.search-box input {
+				width: 100px;
+			}
+		}
+
+		@keyframes fadeOut {
+			to { opacity: 0; transform: translateY(-6px); }
+		}
+
+		@keyframes shake {
+			0%, 100% { transform: translateX(0) scale(1); }
+			20% { transform: translateX(-8px) scale(1); }
+			40% { transform: translateX(8px) scale(1); }
+			60% { transform: translateX(-5px) scale(1); }
+			80% { transform: translateX(5px) scale(1); }
+		}
+
+		@keyframes slideIn {
+			from { opacity: 0; transform: translateY(-8px); }
+			to   { opacity: 1; transform: translateY(0); }
+		}
+
+		.slide-in {
+			animation: slideIn 0.25s ease;
+		}
+	</style>
+</head>
+<body>
+
+<div class="layout">
+	<aside class="sidebar" id="sidebar">
+		<div class="sidebar-logo">Ac<span>.</span>count</div>
+		<div class="sidebar-label">Views</div>
+		<button class="sidebar-item active" onclick="showView('accounts', this)">
+			<span class="material-icons">people</span> All Accounts
+		</button>
+		<button class="sidebar-item" onclick="showView('trash', this)">
+			<span class="material-icons">delete</span> Trash
+			<span class="sidebar-badge" id="trashBadge" style="display:none;"></span>
+		</button>
+	</aside>
+
+	<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+	<main class="main">
+		<div class="main-header">
+			<div class="main-header-left">
+				<button class="mobile-menu-btn" onclick="openSidebar()">
+					<span class="material-icons">menu</span>
+				</button>
+				<h1 class="main-title" id="viewTitle">All Accounts</h1>
+			</div>
+			<div class="header-right">
+				<div class="search-box">
+					<span class="material-icons">search</span>
+					<input type="text" placeholder="Search..." oninput="filterAccounts()" id="searchInput">
+				</div>
+				<button class="btn btn-primary" id="addBtn" onclick="toggleAddForm()">
+					<span class="material-icons">add</span> Add
+				</button>
+			</div>
+		</div>
+
+		<div id="accountsView">
+			<div class="add-form-card" id="addFormCard">
+				<div class="add-form-title">New Account</div>
+				<div class="add-form-grid">
+					<div class="field">
+						<label>Full Name</label>
+						<input class="field-input" id="new-name" placeholder="e.g. Jane Doe">
+					</div>
+					<div class="field">
+						<label>Username</label>
+						<input class="field-input" id="new-username" placeholder="e.g. @janedoe">
+					</div>
+					<div class="field">
+						<label>Email</label>
+						<input class="field-input" id="new-email" placeholder="e.g. jane@example.com">
+					</div>
+					<div class="field">
+						<label>Bio</label>
+						<input class="field-input" id="new-bio" placeholder="Short bio...">
+					</div>
+				</div>
+				<div class="add-form-actions">
+					<button class="btn btn-save" onclick="addAccount()">
+						<span class="material-icons">check</span> Create
+					</button>
+					<button class="btn btn-ghost" onclick="toggleAddForm()">Cancel</button>
+				</div>
+			</div>
+			<div class="account-list" id="accountList"></div>
+		</div>
+
+		<div id="trashView" style="display:none;">
+			<div class="account-list" id="trashList"></div>
+		</div>
+	</main>
+</div>
+
+<div class="toast" id="toast">
+	<span id="toastMsg">Account moved to Trash.</span>
+	<button class="toast-undo" onclick="undoDelete()">Undo</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+	<div class="modal" id="modal">
+		<div class="material-icons modal-icon">warning</div>
+		<div class="modal-title">Permanently delete account?</div>
+		<div class="modal-desc">
+			This cannot be undone. All data will be erased forever.<br><br>
+			Type the username <strong id="modalUsernameHint"></strong> to confirm.
+		</div>
+		<input
+			class="modal-input"
+			id="modalInput"
+			type="text"
+			placeholder="Type username to confirm"
+			oninput="checkModalInput()"
+		>
+		<div class="modal-actions">
+			<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+			<button class="btn btn-confirm" id="confirmDeleteBtn" disabled onclick="permanentlyDelete()">
+				<span class="material-icons">delete_forever</span> Delete Forever
+			</button>
+		</div>
+	</div>
+</div>
+
+<script>
+	const COLORS = ['#5b7fff','#9f6ef5','#e8609a','#34c9a0','#e8a830','#38bcd4','#7dc95e','#e07050'];
+	const TOAST_DURATION = 3000;
+
+	let accounts = [
+		{ id: 1, name: 'Maria Santos',   username: '@mariasantos',   email: 'maria@example.com',   bio: 'Designer & developer.',          color: COLORS[0] },
+		{ id: 2, name: 'James Reyes',    username: '@jamesreyes',    email: 'james@example.com',   bio: 'Frontend engineer.',             color: COLORS[1] },
+		{ id: 3, name: 'Aiko Tanaka',    username: '@aikotanaka',    email: 'aiko@example.com',    bio: 'Product manager at TechCorp.',   color: COLORS[2] },
+		{ id: 4, name: 'Carlos Mendez',  username: '@carlosmendez',  email: 'carlos@example.com',  bio: 'Full-stack dev & coffee lover.', color: COLORS[3] },
+		{ id: 5, name: 'Lena Fischer',   username: '@lenafischer',   email: 'lena@example.com',    bio: 'UX researcher.',                 color: COLORS[4] },
+		{ id: 6, name: 'Omar Hassan',    username: '@omarhassan',    email: 'omar@example.com',    bio: 'Mobile dev, iOS & Android.',     color: COLORS[5] },
+		{ id: 7, name: 'Priya Nair',     username: '@priyanair',     email: 'priya@example.com',   bio: 'Data scientist & ML engineer.',  color: COLORS[6] },
+		{ id: 8, name: 'Lucas Oliveira', username: '@lucasoliveira', email: 'lucas@example.com',   bio: 'DevOps & cloud infrastructure.', color: COLORS[7] },
+	];
+
+	let trashItems = [];
+	let pendingDelete = null;
+	let toastTimer = null;
+	let currentModalId = null;
+	let editingId = null;
+	let currentView = 'accounts';
+	let nextId = 9;
+
+	function initials(name) {
+		return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+	}
+
+	function pickColor(id) {
+		return COLORS[id % COLORS.length];
+	}
+
+	function getAccount(id) {
+		return accounts.find(a => a.id === id);
+	}
+
+	function getFilteredAccounts() {
+		const q = document.getElementById('searchInput').value.toLowerCase().trim();
+		if (!q) return accounts;
+		return accounts.filter(a =>
+			a.name.toLowerCase().includes(q) ||
+			a.username.toLowerCase().includes(q) ||
+			a.email.toLowerCase().includes(q)
+		);
+	}
+
+	function renderAccounts(list) {
+		const container = document.getElementById('accountList');
+		if (!list.length) {
+			container.innerHTML = `<div class="empty-state"><span class="material-icons">person_off</span><p>No accounts found.</p></div>`;
+			return;
+		}
+		container.innerHTML = '';
+		list.forEach(acc => container.appendChild(buildAccountCard(acc)));
+	}
+
+	function buildAccountCard(acc) {
+		const card = document.createElement('div');
+		card.className = 'account-card slide-in';
+		card.id = 'card-' + acc.id;
+		if (acc.deactivated) card.classList.add('deactivated');
+		card.innerHTML = `
+			<div class="account-row">
+				<div class="avatar" style="background:${acc.color}">${initials(acc.name)}</div>
+				<div class="account-info">
+					<div class="account-name">${acc.name}</div>
+					<div class="account-meta">${acc.username} &middot; ${acc.email}</div>
+				</div>
+				<div class="account-actions">
+					<button class="btn btn-ghost" onclick="toggleEdit(${acc.id})">
+						<span class="material-icons">edit</span> Edit
+					</button>
+					<button class="btn btn-danger" onclick="triggerDelete(${acc.id})">
+						<span class="material-icons">delete</span> Delete
+					</button>
+				</div>
+			</div>
+			${acc.deactivated ? `
+				<div class="deactivation-banner">
+					<span class="material-icons">schedule</span>
+					Scheduled for deletion in 30 days.
+				</div>` : ''}
+			<div class="expand-area" id="expand-${acc.id}">
+				<div class="expand-inner">
+					<div class="field">
+						<label>Full Name</label>
+						<input class="field-input" id="edit-name-${acc.id}" value="${acc.name}">
+					</div>
+					<div class="field">
+						<label>Username</label>
+						<input class="field-input" id="edit-username-${acc.id}" value="${acc.username}">
+					</div>
+					<div class="field">
+						<label>Email</label>
+						<input class="field-input" id="edit-email-${acc.id}" value="${acc.email}">
+					</div>
+					<div class="field">
+						<label>Bio</label>
+						<input class="field-input" id="edit-bio-${acc.id}" value="${acc.bio}">
+					</div>
+					<div class="edit-actions">
+						<button class="btn btn-save" onclick="saveEdit(${acc.id})">
+							<span class="material-icons">check</span> Save
+						</button>
+						<button class="btn btn-ghost" onclick="cancelEdit(${acc.id})">Cancel</button>
+					</div>
+				</div>
+			</div>
+		`;
+		return card;
+	}
+
+	function renderTrash() {
+		const container = document.getElementById('trashList');
+		if (!trashItems.length) {
+			container.innerHTML = `<div class="empty-state"><span class="material-icons">delete_outline</span><p>Trash is empty.</p></div>`;
+			return;
+		}
+		container.innerHTML = '';
+		trashItems.forEach(acc => {
+			const card = document.createElement('div');
+			card.className = 'account-card slide-in';
+			card.id = 'trash-card-' + acc.id;
+			card.innerHTML = `
+				<div class="account-row">
+					<div class="avatar" style="background:${acc.color};opacity:0.4">${initials(acc.name)}</div>
+					<div class="account-info">
+						<div class="account-name" style="color:var(--text-muted)">${acc.name}</div>
+						<div class="account-meta">${acc.username} &middot; Permanently deleted in 30 days</div>
+					</div>
+				</div>
+				<div class="trash-actions">
+					<button class="btn btn-restore" onclick="restoreAccount(${acc.id})">
+						<span class="material-icons">restore</span> Restore
+					</button>
+					<button class="btn btn-danger" style="margin-left:0" onclick="openModal(${acc.id})">
+						<span class="material-icons">delete_forever</span> Delete Forever
+					</button>
+				</div>
+			`;
+			container.appendChild(card);
+		});
+	}
+
+	function toggleAddForm() {
+		const form = document.getElementById('addFormCard');
+		const isVisible = form.classList.contains('visible');
+		form.classList.toggle('visible', !isVisible);
+		if (!isVisible) document.getElementById('new-name').focus();
+	}
+
+	function addAccount() {
+		const name     = document.getElementById('new-name').value.trim();
+		const username = document.getElementById('new-username').value.trim();
+		const email    = document.getElementById('new-email').value.trim();
+		const bio      = document.getElementById('new-bio').value.trim();
+		if (!name || !username) return;
+		const acc = { id: nextId++, name, username, email: email || '—', bio: bio || '—', color: pickColor(nextId) };
+		accounts.unshift(acc);
+		document.getElementById('new-name').value = '';
+		document.getElementById('new-username').value = '';
+		document.getElementById('new-email').value = '';
+		document.getElementById('new-bio').value = '';
+		document.getElementById('addFormCard').classList.remove('visible');
+		renderAccounts(getFilteredAccounts());
+	}
+
+	function toggleEdit(id) {
+		if (editingId && editingId !== id) cancelEdit(editingId);
+		const area = document.getElementById('expand-' + id);
+		if (!area) return;
+		const isOpen = area.classList.contains('open');
+		isOpen ? cancelEdit(id) : (area.classList.add('open'), editingId = id);
+	}
+
+	function saveEdit(id) {
+		const acc = getAccount(id);
+		if (!acc) return;
+		acc.name     = document.getElementById('edit-name-' + id).value.trim() || acc.name;
+		acc.username = document.getElementById('edit-username-' + id).value.trim() || acc.username;
+		acc.email    = document.getElementById('edit-email-' + id).value.trim() || acc.email;
+		acc.bio      = document.getElementById('edit-bio-' + id).value.trim() || acc.bio;
+		editingId = null;
+		renderAccounts(getFilteredAccounts());
+	}
+
+	function cancelEdit(id) {
+		const area = document.getElementById('expand-' + id);
+		if (area) area.classList.remove('open');
+		editingId = null;
+	}
+
+	function triggerDelete(id) {
+		pendingDelete = id;
+		const acc = getAccount(id);
+		showToast(acc ? acc.name : 'Account');
+	}
+
+	function showToast(name) {
+		const toast = document.getElementById('toast');
+		document.getElementById('toastMsg').textContent = name + ' moved to Trash.';
+		toast.classList.add('visible');
+		clearTimeout(toastTimer);
+		toastTimer = setTimeout(() => {
+			toast.classList.remove('visible');
+			setTimeout(commitDelete, 500);
+		}, TOAST_DURATION);
+	}
+
+	function undoDelete() {
+		clearTimeout(toastTimer);
+		document.getElementById('toast').classList.remove('visible');
+		pendingDelete = null;
+	}
+
+	function commitDelete() {
+		if (pendingDelete === null) return;
+		const id = pendingDelete;
+		pendingDelete = null;
+		const idx = accounts.findIndex(a => a.id === id);
+		if (idx === -1) return;
+		const acc = { ...accounts[idx], deactivated: true };
+		accounts.splice(idx, 1);
+		trashItems.push(acc);
+		updateTrashBadge();
+		renderAccounts(getFilteredAccounts());
+		if (currentView === 'trash') renderTrash();
+	}
+
+	function restoreAccount(id) {
+		const idx = trashItems.findIndex(a => a.id === id);
+		if (idx === -1) return;
+		const acc = { ...trashItems[idx], deactivated: false };
+		trashItems.splice(idx, 1);
+		accounts.push(acc);
+		updateTrashBadge();
+		renderTrash();
+		if (currentView === 'accounts') renderAccounts(getFilteredAccounts());
+	}
+
+	function openModal(id) {
+		currentModalId = id;
+		const acc = trashItems.find(a => a.id === id);
+		if (!acc) return;
+		document.getElementById('modalUsernameHint').textContent = acc.username;
+		document.getElementById('modalInput').value = '';
+		document.getElementById('modalInput').classList.remove('matched');
+		document.getElementById('confirmDeleteBtn').disabled = true;
+		document.getElementById('overlay').classList.add('visible');
+		setTimeout(() => document.getElementById('modalInput').focus(), 200);
+	}
+
+	function closeModal() {
+		document.getElementById('overlay').classList.remove('visible');
+		currentModalId = null;
+	}
+
+	function handleOverlayClick(e) {
+		if (e.target === document.getElementById('overlay')) closeModal();
+	}
+
+	function checkModalInput() {
+		if (currentModalId === null) return;
+		const acc = trashItems.find(a => a.id === currentModalId);
+		const input = document.getElementById('modalInput');
+		const matched = acc && input.value.trim() === acc.username;
+		document.getElementById('confirmDeleteBtn').disabled = !matched;
+		input.classList.toggle('matched', !!matched);
+	}
+
+	function permanentlyDelete() {
+		const id = currentModalId;
+		const modal = document.getElementById('modal');
+		modal.classList.add('shake');
+		setTimeout(() => {
+			modal.classList.remove('shake');
+			closeModal();
+			const card = document.getElementById('trash-card-' + id);
+			if (card) {
+				card.classList.add('fade-out');
+				setTimeout(() => {
+					trashItems = trashItems.filter(a => a.id !== id);
+					updateTrashBadge();
+					renderTrash();
+				}, 350);
+			}
+		}, 400);
+	}
+
+	function updateTrashBadge() {
+		const badge = document.getElementById('trashBadge');
+		badge.textContent = trashItems.length;
+		badge.style.display = trashItems.length ? 'inline-block' : 'none';
+	}
+
+	function showView(view, btn) {
+		currentView = view;
+		document.getElementById('accountsView').style.display = view === 'accounts' ? 'block' : 'none';
+		document.getElementById('trashView').style.display = view === 'trash' ? 'block' : 'none';
+		document.getElementById('viewTitle').textContent = view === 'accounts' ? 'All Accounts' : 'Trash';
+		document.getElementById('addBtn').style.display = view === 'accounts' ? 'inline-flex' : 'none';
+		document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+		btn.classList.add('active');
+		if (view === 'trash') renderTrash();
+		if (view === 'accounts') renderAccounts(getFilteredAccounts());
+		closeSidebar();
+	}
+
+	function filterAccounts() {
+		if (currentView === 'accounts') renderAccounts(getFilteredAccounts());
+	}
+
+	function openSidebar() {
+		document.getElementById('sidebar').classList.add('open');
+		document.getElementById('sidebarOverlay').classList.add('visible');
+	}
+
+	function closeSidebar() {
+		document.getElementById('sidebar').classList.remove('open');
+		document.getElementById('sidebarOverlay').classList.remove('visible');
+	}
+
+	document.addEventListener('keydown', e => {
+		if (e.key === 'Escape') closeModal();
+	});
+
+	renderAccounts(accounts);
+</script>
+</body>
+</html>
